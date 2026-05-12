@@ -1,0 +1,1 @@
+// Þifre doðrulama kodlarý
