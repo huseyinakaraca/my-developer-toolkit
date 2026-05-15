@@ -4,9 +4,9 @@ namespace my_developertoolkit.Extensions
 {
     public static class InputValidationExtensions
     {
+        //Ad ve Soyad
         public static string GetFullNameValidationMessage(this string name)
         {
-            //Ad ve Soyad
             if (string.IsNullOrWhiteSpace(name))
                 return "Ad ve soyad alaný boþ býrakýlamaz.";
             if (name.Length > 50)
@@ -37,6 +37,32 @@ namespace my_developertoolkit.Extensions
             }
             if (soyisim != soyisim.ToUpper())
                 return $"Soyadýnýzý ('{soyisim}') tamamen büyük harf yazmalýsýnýz (Örn: {soyisim.ToUpper()}).";
+            return "OK";
+        }
+        //Tc_Kimlik
+        public static string GetTcNoValidationMessage(this string tcNo)
+        {
+            if (string.IsNullOrWhiteSpace(tcNo))
+                return "TC Kimlik alaný boþ býrakýlamaz.";
+            if (tcNo.Length != 11)
+                return "TC Kimlik numarasý tam 11 hane olmalýdýr.";
+            if (tcNo.Any(c => !char.IsDigit(c)))
+                return "TC Kimlik numarasý sadece rakamlardan oluþmalýdýr.";
+            if (tcNo.StartsWith("0"))
+                return "TC Kimlik numarasý 0 ile baþlayamaz.";
+            int[] n = tcNo.Select(c => int.Parse(c.ToString())).ToArray();
+            int teklerToplami = n[0] + n[2] + n[4] + n[6] + n[8];
+            int ciftlerToplami = n[1] + n[3] + n[5] + n[7];
+            int haneten = ((teklerToplami * 7) - ciftlerToplami) % 10;
+            if (haneten != n[9])
+                return "Geçersiz bir TC Kimlik numarasý girdiniz.";
+            int ilkOnToplam = 0;
+            for (int i = 0; i < 10; i++)
+            {
+                ilkOnToplam += n[i];
+            }
+            if (ilkOnToplam % 10 != n[10])
+                return "Geçersiz bir TC Kimlik numarasý girdiniz.";
             return "OK";
         }
     }
