@@ -22,14 +22,14 @@ namespace my_developertoolkit.Extensions
                 return "Lütfen hem adýnýzý hem de soyadýnýzý girdiðinizden emin olun.";
             string soyisim = parcalar.Last();
             string isimKismi = string.Join(" ", parcalar.Take(parcalar.Length - 1));
-            if (isimKismi.Length < 3)
-                return $"Ad kýsmýnýz ('{isimKismi}') biraz kýsa görünüyor, en az 3 karakter olmalý.";
+            if (isimKismi.Length < 2)
+                return $"Ad kýsmýnýz ('{isimKismi}') biraz kýsa görünüyor, en az 2 karakter olmalý.";
             if (soyisim.Length < 2)
                 return $"Soyadýnýz ('{soyisim}') en az 2 karakter olmalý.";
             foreach (var isim in parcalar.Take(parcalar.Length - 1))
             {
-                if (isim.Length < 3)
-                    return $"Ad kýsmýndaki '{isim}' kelimesi çok kýsa. Her bir ad en az 3 karakter olmalýdýr.";
+                if (isim.Length < 2)
+                    return $"Ad kýsmýndaki '{isim}' kelimesi çok kýsa. Her bir ad en az 2 karakter olmalýdýr.";
                 string idealIsim = char.ToUpper(isim[0]) + isim.Substring(1).ToLower();
 
                 if (isim != idealIsim)
@@ -101,6 +101,30 @@ namespace my_developertoolkit.Extensions
             string inputPrefix = digitsOnly.Substring(0, 4);
             if (!gecerliPrefixler.Contains(inputPrefix))
                 return $"'{inputPrefix}' ile baþlayan geçerli bir operatör bulunamadý.";
+            return "OK";
+        }
+        public static string GetEmailValidationMessage(this string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return "E-posta alaný boþ býrakýlamaz.";
+            if (email.Contains(" "))
+                return "E-posta adresi boþluk içeremez.";
+            if (email.Length > 60)
+                return "E-posta adresi çok uzun, en fazla 60 karakter olabilir.";
+            string[] gecerliUzantilar = { "@gmail.com", "@outlook.com", "@hotmail.com" };
+            if (!gecerliUzantilar.Any(uzanti => email.EndsWith(uzanti)))
+                return "Geçersiz e-posta! Adresinizin sonuna '@gmail.com', '@outlook.com' veya '@hotmail.com' eklemelisiniz (Örn: isim@gmail.com).";
+            string secilenUzanti = gecerliUzantilar.First(uzanti => email.EndsWith(uzanti));
+            if (email.Length <= secilenUzanti.Length)
+                return "Lütfen '@' iþaretinden önceki kýsmý boþ býrakmayýnýz (Örn: huseyin@gmail.com).";
+            string kullaniciAdi = email.Replace(secilenUzanti, "");
+            if (kullaniciAdi.Length < 3)
+                return "E-postanýzýn '@' iþaretinden önceki kýsmý en az 3 karakter olmalýdýr.";
+            if (!kullaniciAdi.Any(char.IsLetter))
+                return "E-postanýzýn '@' iþaretinden önceki kýsmý sadece rakamlardan oluþamaz, harf de içermelidir.";
+            string izinVerilenKarakterler = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
+            if (!kullaniciAdi.All(c => izinVerilenKarakterler.Contains(c)))
+                return "E-posta adresi Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez.";
             return "OK";
         }
     }
