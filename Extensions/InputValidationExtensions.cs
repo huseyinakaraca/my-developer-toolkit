@@ -53,7 +53,7 @@ namespace my_developertoolkit.Extensions
             int[] n = tcNo.Select(c => int.Parse(c.ToString())).ToArray();
             int teklerToplami = n[0] + n[2] + n[4] + n[6] + n[8];
             int ciftlerToplami = n[1] + n[3] + n[5] + n[7];
-            int haneten = ((teklerToplami * 7) - ciftlerToplami) % 10;
+            int haneten = (((teklerToplami * 7) - ciftlerToplami) % 10 + 10) % 10;
             if (haneten != n[9])
                 return "Geçersiz bir TC Kimlik numarasý girdiniz.";
             int ilkOnToplam = 0;
@@ -63,6 +63,44 @@ namespace my_developertoolkit.Extensions
             }
             if (ilkOnToplam % 10 != n[10])
                 return "Geçersiz bir TC Kimlik numarasý girdiniz.";
+            return "OK";
+        }
+        //Telefon 
+        public static string GetPhoneNumberValidationMessage(this string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return "Telefon numarasý alaný boþ býrakýlamaz.";
+            if (phone.Any(c => char.IsLetter(c)))
+                return "Telefon numarasý harf içeremez, sadece sayý girilmelidir.";
+            string digitsOnly = new string(phone.Where(char.IsDigit).ToArray());
+            if (digitsOnly.StartsWith("905") && digitsOnly.Length == 12)
+            {
+                digitsOnly = "0" + digitsOnly.Substring(2);
+            }
+            else if (digitsOnly.StartsWith("5") && digitsOnly.Length == 10)
+            {
+                digitsOnly = "0" + digitsOnly;
+            }
+            if (digitsOnly.Length != 11)
+                return "Telefon numarasý 11 hane olmalýdýr (Örn: 05xx xxx xx xx).";
+            if (!digitsOnly.StartsWith("05"))
+                return "Telefon numarasý '05' ile baþlamalýdýr.";
+            string aboneKismi = digitsOnly.Substring(4);
+            if (aboneKismi.Distinct().Count() == 1)
+                return "Lütfen rastgele (spam) bir numara girmeyiniz.";
+            if ("0123456789".Contains(aboneKismi) || "9876543210".Contains(aboneKismi))
+                return "Sýralý rakamlardan oluþan rastgele numaralar kabul edilmemektedir.";
+            string[] gecerliPrefixler =
+              {
+              "0501", "0505", "0506", "0507", // Türk Telekom
+              "0530", "0531", "0532", "0533", "0534", "0535", "0536", "0537", "0538", "0539", // Turkcell
+              "0540", "0541", "0542", "0543", "0544", "0545", "0546", "0547", "0548", "0549", // Vodafone
+              "0551", "0552", "0553", "0554", "0555", "0559", // BIMcell, PTTCell vb.
+              "0561" // Emniyet / Netgsm vb.
+              };
+            string inputPrefix = digitsOnly.Substring(0, 4);
+            if (!gecerliPrefixler.Contains(inputPrefix))
+                return $"'{inputPrefix}' ile baþlayan geçerli bir operatör bulunamadý.";
             return "OK";
         }
     }
