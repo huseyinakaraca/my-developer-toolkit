@@ -103,6 +103,7 @@ namespace my_developertoolkit.Extensions
                 return $"'{inputPrefix}' ile baþlayan geçerli bir operatör bulunamadý.";
             return "OK";
         }
+        //E-Posta
         public static string GetEmailValidationMessage(this string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -125,6 +126,32 @@ namespace my_developertoolkit.Extensions
             string izinVerilenKarakterler = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
             if (!kullaniciAdi.All(c => izinVerilenKarakterler.Contains(c)))
                 return "E-posta adresi Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez.";
+            return "OK";
+        }
+        // Þifre
+        public static string GetPasswordValidationMessage(this string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                return "Þifre alaný boþ býrakýlamaz.";
+            if (password.Contains(" "))
+                return "Þifreniz boþluk içeremez.";
+            List<string> hatalar = new List<string>();
+            if (password.Length < 8)
+                hatalar.Add("- En az 8 karakter olmalýdýr.");
+            if (password.Length > 50)
+                hatalar.Add("- En fazla 50 karakter olabilir.");
+            if (!password.Any(char.IsUpper))
+                hatalar.Add("- En az bir büyük harf içermelidir.");
+            if (!password.Any(char.IsLower))
+                hatalar.Add("- En az bir küçük harf içermelidir.");
+            if (!password.Any(char.IsDigit))
+                hatalar.Add("- En az bir rakam içermelidir.");
+            if (!password.Any(c => !char.IsLetterOrDigit(c)))
+                hatalar.Add("- En az bir özel karakter (!, ?, * vb.) içermelidir.");
+            if (hatalar.Any())
+            {
+                return "Þifreniz zayýf. Lütfen þunlarý ekleyin:\n" + string.Join("\n", hatalar);
+            }
             return "OK";
         }
     }
