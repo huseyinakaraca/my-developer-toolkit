@@ -9,14 +9,17 @@ namespace my_developertoolkit.Extensions
         {
             if (string.IsNullOrWhiteSpace(name))
                 return "Ad ve soyad alaný boþ býrakýlamaz.";
+            List<string> hatalar = new List<string>();
             if (name.Length > 50)
-                return "Ad ve soyad toplamda en fazla 50 karakter olabilir.";
+                hatalar.Add("- Toplamda en fazla 50 karakter olabilir.");
             if (name.StartsWith(" ") || name.EndsWith(" "))
-                return "Lütfen ad ve soyad baþýnda veya sonunda boþluk býrakmayýn.";
+                hatalar.Add("- Baþýnda veya sonunda boþluk býrakýlamaz.");
             if (name.Contains("  "))
-                return "Kelimeler arasýnda sadece bir tane boþluk býrakabilirsiniz.";
-            if (name.Any(c => char.IsDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c)))
-                return "Sadece harf kullanýlabilirsin.";
+                hatalar.Add("- Kelimeler arasýnda sadece bir tane boþluk býrakabilirsiniz.");
+            if (name.Replace(" ", "").Any(c => !char.IsLetter(c)))
+                hatalar.Add("- Sadece harf kullanýlabilir (Rakam veya sembol içeremez).");
+            if (hatalar.Any())
+                return "Ad/Soyad giriþinizde þu hatalar var:\n" + string.Join("\n", hatalar);
             var parcalar = name.Split(' ');
             if (parcalar.Length < 2)
                 return "Lütfen hem adýnýzý hem de soyadýnýzý girdiðinizden emin olun.";
@@ -31,7 +34,6 @@ namespace my_developertoolkit.Extensions
                 if (isim.Length < 2)
                     return $"Ad kýsmýndaki '{isim}' kelimesi çok kýsa. Her bir ad en az 2 karakter olmalýdýr.";
                 string idealIsim = char.ToUpper(isim[0]) + isim.Substring(1).ToLower();
-
                 if (isim != idealIsim)
                     return $"'{isim}' yazýmý uygun deðil. Adlarýn ilk harfi büyük, diðer harfleri küçük olmalýdýr (Örn: {idealIsim}).";
             }
@@ -44,12 +46,15 @@ namespace my_developertoolkit.Extensions
         {
             if (string.IsNullOrWhiteSpace(tcNo))
                 return "TC Kimlik alaný boþ býrakýlamaz.";
+            List<string> hatalar = new List<string>();
             if (tcNo.Length != 11)
-                return "TC Kimlik numarasý tam 11 hane olmalýdýr.";
+                hatalar.Add("- Tam 11 hane olmalýdýr.");
             if (tcNo.Any(c => !char.IsDigit(c)))
-                return "TC Kimlik numarasý sadece rakamlardan oluþmalýdýr.";
+                hatalar.Add("- Sadece rakamlardan oluþmalýdýr (Harf veya boþluk içeremez).");
             if (tcNo.StartsWith("0"))
-                return "TC Kimlik numarasý 0 ile baþlayamaz.";
+                hatalar.Add("- 0 ile baþlayamaz.");
+            if (hatalar.Any())
+                return "TC Kimlik giriþinizde þu hatalar var:\n" + string.Join("\n", hatalar);
             int[] n = tcNo.Select(c => int.Parse(c.ToString())).ToArray();
             int teklerToplami = n[0] + n[2] + n[4] + n[6] + n[8];
             int ciftlerToplami = n[1] + n[3] + n[5] + n[7];
@@ -70,8 +75,9 @@ namespace my_developertoolkit.Extensions
         {
             if (string.IsNullOrWhiteSpace(phone))
                 return "Telefon numarasý alaný boþ býrakýlamaz.";
+            List<string> hatalar = new List<string>();
             if (phone.Any(c => char.IsLetter(c)))
-                return "Telefon numarasý harf içeremez, sadece sayý girilmelidir.";
+                hatalar.Add("- Harf içeremez, sadece sayý girilmelidir.");
             string digitsOnly = new string(phone.Where(char.IsDigit).ToArray());
             if (digitsOnly.StartsWith("905") && digitsOnly.Length == 12)
             {
@@ -82,22 +88,23 @@ namespace my_developertoolkit.Extensions
                 digitsOnly = "0" + digitsOnly;
             }
             if (digitsOnly.Length != 11)
-                return "Telefon numarasý 11 hane olmalýdýr (Örn: 05xx xxx xx xx).";
-            if (!digitsOnly.StartsWith("05"))
-                return "Telefon numarasý '05' ile baþlamalýdýr.";
+                hatalar.Add("- Tam 11 hane olmalýdýr (Örn: 05xx xxx xx xx).");
+            if (digitsOnly.Length > 0 && !digitsOnly.StartsWith("05"))
+                hatalar.Add("- '05' ile baþlamalýdýr.");
+            if (hatalar.Any())
+                return "Telefon giriþinizde þu hatalar var:\n" + string.Join("\n", hatalar);
             string aboneKismi = digitsOnly.Substring(4);
             if (aboneKismi.Distinct().Count() == 1)
                 return "Lütfen rastgele (spam) bir numara girmeyiniz.";
             if ("0123456789".Contains(aboneKismi) || "9876543210".Contains(aboneKismi))
                 return "Sýralý rakamlardan oluþan rastgele numaralar kabul edilmemektedir.";
-            string[] gecerliPrefixler =
-              {
-              "0501", "0505", "0506", "0507", // Türk Telekom
-              "0530", "0531", "0532", "0533", "0534", "0535", "0536", "0537", "0538", "0539", // Turkcell
-              "0540", "0541", "0542", "0543", "0544", "0545", "0546", "0547", "0548", "0549", // Vodafone
-              "0551", "0552", "0553", "0554", "0555", "0559", // BIMcell, PTTCell vb.
-              "0561" // Emniyet / Netgsm vb.
-              };
+            string[] gecerliPrefixler = {
+            "0501", "0505", "0506", "0507", // Türk Telekom
+            "0530", "0531", "0532", "0533", "0534", "0535", "0536", "0537", "0538", "0539", // Turkcell
+            "0540", "0541", "0542", "0543", "0544", "0545", "0546", "0547", "0548", "0549", // Vodafone
+            "0551", "0552", "0553", "0554", "0555", "0559", // BIMcell
+            "0561" // Emniyet 
+            };
             string inputPrefix = digitsOnly.Substring(0, 4);
             if (!gecerliPrefixler.Contains(inputPrefix))
                 return $"'{inputPrefix}' ile baþlayan geçerli bir operatör bulunamadý.";
@@ -108,24 +115,45 @@ namespace my_developertoolkit.Extensions
         {
             if (string.IsNullOrWhiteSpace(email))
                 return "E-posta alaný boþ býrakýlamaz.";
+            List<string> hatalar = new List<string>();
             if (email.Contains(" "))
-                return "E-posta adresi boþluk içeremez.";
-            if (email.Length > 60)
-                return "E-posta adresi çok uzun, en fazla 60 karakter olabilir.";
+                hatalar.Add("- E-posta adresi boþluk içeremez.");
+            if (email.Length > 65)
+                hatalar.Add("- Toplam adres çok uzun, en fazla 65 karakter olabilir.");
             string[] gecerliUzantilar = { "@gmail.com", "@outlook.com", "@hotmail.com" };
-            if (!gecerliUzantilar.Any(uzanti => email.EndsWith(uzanti)))
-                return "Geçersiz e-posta! Adresinizin sonuna '@gmail.com', '@outlook.com' veya '@hotmail.com' eklemelisiniz (Örn: isim@gmail.com).";
-            string secilenUzanti = gecerliUzantilar.First(uzanti => email.EndsWith(uzanti));
-            if (email.Length <= secilenUzanti.Length)
-                return "Lütfen '@' iþaretinden önceki kýsmý boþ býrakmayýnýz (Örn: huseyin@gmail.com).";
-            string kullaniciAdi = email.Replace(secilenUzanti, "");
-            if (kullaniciAdi.Length < 3)
-                return "E-postanýzýn '@' iþaretinden önceki kýsmý en az 3 karakter olmalýdýr.";
-            if (!kullaniciAdi.Any(char.IsLetter))
-                return "E-postanýzýn '@' iþaretinden önceki kýsmý sadece rakamlardan oluþamaz, harf de içermelidir.";
-            string izinVerilenKarakterler = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
-            if (!kullaniciAdi.All(c => izinVerilenKarakterler.Contains(c)))
-                return "E-posta adresi Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez.";
+            string secilenUzanti = gecerliUzantilar.FirstOrDefault(uzanti => email.EndsWith(uzanti));
+            string kullaniciAdi = email;
+            if (secilenUzanti == null)
+            {
+                hatalar.Add("- Adresinizin sonuna '@gmail.com', '@outlook.com' veya '@hotmail.com' eklemelisiniz.");
+                int atIndex = email.LastIndexOf('@');
+                if (atIndex > 0)
+                {
+                    kullaniciAdi = email.Substring(0, atIndex);
+                }
+            }
+            else
+            {
+                kullaniciAdi = email.Substring(0, email.Length - secilenUzanti.Length);
+            }
+            if (string.IsNullOrWhiteSpace(kullaniciAdi))
+            {
+                hatalar.Add("- Lütfen '@' iþaretinden önceki kýsmý boþ býrakmayýnýz.");
+            }
+            else
+            {
+                if (kullaniciAdi.Length < 3)
+                    hatalar.Add("- '@' iþaretinden önceki kýsým en az 3 karakter olmalýdýr.");
+                if (kullaniciAdi.Length > 50)
+                    hatalar.Add("- '@' iþaretinden önceki kýsým en fazla 50 karakter olabilir.");
+                if (!kullaniciAdi.Any(char.IsLetter))
+                    hatalar.Add("- '@' iþaretinden önceki kýsým harf de içermelidir (Sadece rakam olamaz).");
+                string izinVerilenKarakterler = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-";
+                if (!kullaniciAdi.Replace(" ", "").All(c => izinVerilenKarakterler.Contains(c)))
+                    hatalar.Add("- Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez.");
+            }
+            if (hatalar.Any())
+                return "E-posta adresinizde þu hatalar var:\n" + string.Join("\n", hatalar);
             return "OK";
         }
         // Þifre
@@ -159,17 +187,20 @@ namespace my_developertoolkit.Extensions
         {
             if (string.IsNullOrWhiteSpace(username))
                 return "Kullanýcý adý alaný boþ býrakýlamaz.";
+            List<string> hatalar = new List<string>();
             if (username.Contains(" "))
-                return "Kullanýcý adýnda boþluk bulunamaz. Lütfen bitiþik yazýnýz.";
+                hatalar.Add("- Boþluk bulunamaz. Lütfen bitiþik yazýnýz.");
             if (username.Length < 3)
-                return "Kullanýcý adý çok kýsa, en az 3 karakter olmalýdýr.";
+                hatalar.Add("- Çok kýsa, en az 3 karakter olmalýdýr.");
             if (username.Length > 15)
-                return "Kullanýcý adý çok uzun, en fazla 15 karakter olabilir.";
+                hatalar.Add("- Çok uzun, en fazla 15 karakter olabilir.");
             if (username.All(char.IsDigit))
-                return "Kullanýcý adý sadece rakamlardan oluþamaz, en az bir harf içermelidir.";
+                hatalar.Add("- Sadece rakamlardan oluþamaz, en az bir harf içermelidir.");
             string izinVerilenKarakterler = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
             if (!username.All(c => izinVerilenKarakterler.Contains(c)))
-                return "Kullanýcý adý Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez. Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz.";
+                hatalar.Add("- Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez. Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz.");
+            if (hatalar.Any())
+                return "Kullanýcý adý giriþinizde þu hatalar var:\n" + string.Join("\n", hatalar);
             return "OK";
         }
         // Doðum Tarihi ve Yaþ Sýnýrý
