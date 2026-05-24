@@ -154,5 +154,23 @@ namespace my_developertoolkit.Extensions
             }
             return "OK";
         }
+        //Kullanýcý Adý
+        public static string GetUsernameValidationMessage(this string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return "Kullanýcý adý alaný boþ býrakýlamaz.";
+            if (username.Contains(" "))
+                return "Kullanýcý adýnda boþluk bulunamaz. Lütfen bitiþik yazýnýz.";
+            if (username.Length < 3)
+                return "Kullanýcý adý çok kýsa, en az 3 karakter olmalýdýr.";
+            if (username.Length > 15)
+                return "Kullanýcý adý çok uzun, en fazla 15 karakter olabilir.";
+            if (username.All(char.IsDigit))
+                return "Kullanýcý adý sadece rakamlardan oluþamaz, en az bir harf içermelidir.";
+            string izinVerilenKarakterler = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+            if (!username.All(c => izinVerilenKarakterler.Contains(c)))
+                return "Kullanýcý adý Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez. Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz.";
+            return "OK";
+        }
     }
 }
