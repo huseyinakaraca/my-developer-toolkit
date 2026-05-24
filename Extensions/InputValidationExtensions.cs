@@ -172,5 +172,26 @@ namespace my_developertoolkit.Extensions
                 return "Kullanýcý adý Türkçe karakter (ç,ð,ý,ö,þ,ü) veya geçersiz sembol içeremez. Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz.";
             return "OK";
         }
+        // Doðum Tarihi ve Yaþ Sýnýrý
+        public static string GetBirthDateValidationMessage(this string birthDateText)
+        {
+            if (string.IsNullOrWhiteSpace(birthDateText))
+                return "Doðum tarihi alaný boþ býrakýlamaz.";
+            if (!DateTime.TryParse(birthDateText, out DateTime dogumTarihi))
+                return "Lütfen geçerli bir tarih formatý giriniz (Örn: 25.05.2005 veya 25/05/2005).";
+            DateTime bugun = DateTime.Today;
+            if (dogumTarihi > bugun)
+                return "Doðum tarihi bugünden ileri bir tarih olamaz. Gelecekten mi geldiniz?";
+            int yas = bugun.Year - dogumTarihi.Year;
+            if (dogumTarihi.Date > bugun.AddYears(-yas))
+            {
+                yas--;
+            }
+            if (yas > 120)
+                return "Lütfen geçerli bir doðum yýlý girdiðinizden emin olun.";
+            if (yas < 13)
+                return $"Uygulamamýzý kullanabilmek için en az 13 yaþýnda olmalýsýnýz. (Mevcut yaþýnýz: {yas})";
+            return "OK";
+        }
     }
 }
